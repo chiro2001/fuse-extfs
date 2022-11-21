@@ -1,5 +1,5 @@
 #include "rfs.h"
-#include "rfs/lib.h"
+#include "rfs_lib/lib.h"
 
 /******************************************************************************
 * SECTION: 宏定义
