@@ -1,4 +1,9 @@
 #include "rfs.h"
+#include "rfs_lib/lib.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /******************************************************************************
 * SECTION: 宏定义
@@ -19,23 +24,22 @@ struct rfs_super super;
 * SECTION: FUSE操作定义
 *******************************************************************************/
 static struct fuse_operations operations = {
-        .init = rfs_init,             /* mount文件系统 */
-        .destroy = rfs_destroy,         /* umount文件系统 */
-        .mkdir = rfs_mkdir,           /* 建目录，mkdir */
         .getattr = rfs_getattr,         /* 获取文件属性，类似stat，必须完成 */
-        .readdir = rfs_readdir,         /* 填充dentrys */
         .mknod = rfs_mknod,           /* 创建文件，touch相关 */
-        .write = NULL,                     /* 写入文件 */
-        .read = NULL,                     /* 读文件 */
-        .utimens = rfs_utimens,         /* 修改时间，忽略，避免touch报错 */
-        .truncate = NULL,                   /* 改变文件大小 */
+        .mkdir = rfs_mkdir,           /* 建目录，mkdir */
         .unlink = NULL,                     /* 删除文件 */
         .rmdir  = NULL,                     /* 删除目录， rm -r */
         .rename = NULL,                     /* 重命名，mv */
-
+        .truncate = NULL,                   /* 改变文件大小 */
         .open = NULL,
+        .read = NULL,                     /* 读文件 */
+        .write = NULL,                     /* 写入文件 */
         .opendir = NULL,
-        .access = NULL
+        .readdir = rfs_readdir,         /* 填充dentrys */
+        .init = rfs_init,             /* mount文件系统 */
+        .destroy = rfs_destroy,         /* umount文件系统 */
+        .access = NULL,
+        .utimens = rfs_utimens         /* 修改时间，忽略，避免touch报错 */
 };
 /******************************************************************************
 * SECTION: 必做函数实现
@@ -287,3 +291,7 @@ int main(int argc, char **argv) {
   fuse_opt_free_args(&args);
   return ret;
 }
+
+#ifdef __cplusplus
+};
+#endif

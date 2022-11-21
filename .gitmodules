@@ -1,0 +1,6 @@
+[submodule "fs/rfs/rfs"]
+	path = fs/rfs/rfs
+	url = https://github.com/chiro2001/rfs
+[submodule "fs/rfs/corrosion"]
+	path = fs/rfs/corrosion
+	url = https://github.com/corrosion-rs/corrosion

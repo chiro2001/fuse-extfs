@@ -1,6 +1,10 @@
 #ifndef _RFS_H_
 #define _RFS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FUSE_USE_VERSION 26
 
 #include "stdio.h"
@@ -54,5 +58,9 @@ int rfs_truncate(const char *, off_t);
 int rfs_open(const char *, struct fuse_file_info *);
 
 int rfs_opendir(const char *, struct fuse_file_info *);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif  /* _rfs_H_ */
