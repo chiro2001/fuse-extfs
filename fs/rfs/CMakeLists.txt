@@ -42,10 +42,10 @@ message("DIR_SRCS ${DIR_SRCS}")
 message("CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 
 # cxxbridge for rust
-corrosion_import_crate(MANIFEST_PATH ${PROJECT_SOURCE_DIR}/rfs/Cargo.toml)
-corrosion_add_cxxbridge(rfs_lib CRATE rfs MANIFEST_PATH rfs FILES lib.rs)
+corrosion_import_crate(MANIFEST_PATH ${PROJECT_SOURCE_DIR}/rfs/rfs_lib/Cargo.toml)
+corrosion_add_cxxbridge(rfs CRATE rfs_lib MANIFEST_PATH rfs_lib FILES lib.rs)
 
-target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES} ddriver rfs_lib)
+target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES} ddriver rfs)
 
 set(MOUNT_POINT ${PROJECT_SOURCE_DIR}/tests/mnt)
 set(DEVICE_PATH $ENV{HOME}/ddriver)

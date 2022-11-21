@@ -1,5 +1,5 @@
 #include "rfs.h"
-#include "rfs_lib/lib.h"
+#include "rfs/lib.h"
 
 /******************************************************************************
 * SECTION: 宏定义
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
   int ret;
   struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
-  rfs_options.device = strdup("TODO: 这里填写你的ddriver设备路径");
+  rfs_options.device = strdup("ddriver");
 
   if (fuse_opt_parse(&args, &rfs_options, option_spec, nullptr) == -1)
     return -1;
