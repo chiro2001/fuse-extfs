@@ -23,18 +23,18 @@ static struct fuse_operations operations = {
         .getattr = rfs_getattr,         /* 获取文件属性，类似stat，必须完成 */
         .mknod = rfs_mknod,           /* 创建文件，touch相关 */
         .mkdir = rfs_mkdir,           /* 建目录，mkdir */
-        .unlink = NULL,                     /* 删除文件 */
-        .rmdir  = NULL,                     /* 删除目录， rm -r */
-        .rename = NULL,                     /* 重命名，mv */
-        .truncate = NULL,                   /* 改变文件大小 */
-        .open = NULL,
-        .read = NULL,                     /* 读文件 */
-        .write = NULL,                     /* 写入文件 */
-        .opendir = NULL,
+        .unlink = nullptr,                     /* 删除文件 */
+        .rmdir  = nullptr,                     /* 删除目录， rm -r */
+        .rename = nullptr,                     /* 重命名，mv */
+        .truncate = nullptr,                   /* 改变文件大小 */
+        .open = nullptr,
+        .read = nullptr,                     /* 读文件 */
+        .write = nullptr,                     /* 写入文件 */
+        .opendir = nullptr,
         .readdir = rfs_readdir,         /* 填充dentrys */
         .init = rfs_init,             /* mount文件系统 */
         .destroy = rfs_destroy,         /* umount文件系统 */
-        .access = NULL,
+        .access = nullptr,
         .utimens = rfs_utimens         /* 修改时间，忽略，避免touch报错 */
 };
 /******************************************************************************
@@ -52,7 +52,7 @@ void *rfs_init(struct fuse_conn_info *conn_info) {
   /* 下面是一个控制设备的示例 */
   super.fd = ddriver_open((char *) rfs_options.device);
 
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -65,8 +65,6 @@ void rfs_destroy(void *p) {
   /* TODO: 在这里进行卸载 */
 
   ddriver_close(super.fd);
-
-  return;
 }
 
 /**
@@ -157,7 +155,7 @@ int rfs_utimens(const char *path, const struct timespec tv[2]) {
 int rfs_write(const char *path, const char *buf, size_t size, off_t offset,
               struct fuse_file_info *fi) {
   /* 选做 */
-  return size;
+  return (int) size;
 }
 
 /**
@@ -173,7 +171,7 @@ int rfs_write(const char *path, const char *buf, size_t size, off_t offset,
 int rfs_read(const char *path, char *buf, size_t size, off_t offset,
              struct fuse_file_info *fi) {
   /* 选做 */
-  return size;
+  return (int) size;
 }
 
 /**
@@ -280,10 +278,10 @@ int main(int argc, char **argv) {
 
   rfs_options.device = strdup("TODO: 这里填写你的ddriver设备路径");
 
-  if (fuse_opt_parse(&args, &rfs_options, option_spec, NULL) == -1)
+  if (fuse_opt_parse(&args, &rfs_options, option_spec, nullptr) == -1)
     return -1;
 
-  ret = fuse_main(args.argc, args.argv, &operations, NULL);
+  ret = fuse_main(args.argc, args.argv, &operations, nullptr);
   fuse_opt_free_args(&args);
   return ret;
 }
