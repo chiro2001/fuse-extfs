@@ -1,10 +1,6 @@
 #include "rfs.h"
 #include "rfs_lib/lib.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /******************************************************************************
 * SECTION: 宏定义
 *******************************************************************************/
@@ -292,6 +288,3 @@ int main(int argc, char **argv) {
   return ret;
 }
 
-#ifdef __cplusplus
-};
-#endif

@@ -1,22 +1,25 @@
 #ifndef _RFS_H_
 #define _RFS_H_
 
+#define FUSE_USE_VERSION 26
+
+#include <cstdio>
+#include <cstdlib>
+#include <unistd.h>
+#include "fcntl.h"
+#include <cstring>
+#include "fuse.h"
+#include <cstddef>
+#include <cerrno>
+#include "types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define FUSE_USE_VERSION 26
-
-#include "stdio.h"
-#include "stdlib.h"
-#include <unistd.h>
-#include "fcntl.h"
-#include "string.h"
-#include "fuse.h"
-#include <stddef.h>
 #include "ddriver.h"
-#include "errno.h"
-#include "types.h"
+#ifdef __cplusplus
+};
+#endif
 
 #define RFS_MAGIC                  /* TODO: Define by yourself */
 #define RFS_DEFAULT_PERM    0777   /* 全权限打开 */
@@ -58,9 +61,5 @@ int rfs_truncate(const char *, off_t);
 int rfs_open(const char *, struct fuse_file_info *);
 
 int rfs_opendir(const char *, struct fuse_file_info *);
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif  /* _rfs_H_ */
