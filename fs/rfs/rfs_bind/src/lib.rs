@@ -1,5 +1,4 @@
 mod bind;
-mod utils;
 
 extern crate rfs;
 extern crate core;
@@ -10,7 +9,7 @@ use std::os::raw::{c_char, c_ulong, c_void};
 use rfs::disk_driver::*;
 use anyhow::{anyhow, Result};
 use bind::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_close, ddriver_ioctl};
-use utils::*;
+use rfs::utils::*;
 
 #[derive(Default)]
 pub struct DDriver {
