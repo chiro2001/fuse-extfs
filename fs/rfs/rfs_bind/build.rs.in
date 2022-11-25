@@ -1,9 +1,17 @@
 extern crate bindgen;
+use std::fs;
+use std::path;
+use std::error::Error;
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let base_dir = "${PROJECT_SOURCE_DIR}";
+    let archive_path = format!("{}/build/user_ddriver/libddriver.a", base_dir);
+    if path::Path::new(&archive_path).exists() {
+        fs::copy(archive_path, format!("{}/rfs_bind/libddriver.a", base_dir))?;
+    }
+
     // Tell cargo to look for shared libraries in the specified directory
-    println!("cargo:rustc-link-search={}/build/user_ddriver", base_dir);
+    println!("cargo:rustc-link-search={}/rfs_bind", base_dir);
 
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
@@ -36,4 +44,5 @@ fn main() {
     bindings
         .write_to_file(out_path)
         .expect("Couldn't write bindings!");
+    Ok(())
 }
