@@ -10,13 +10,13 @@ use bind::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_clos
 
 pub struct DDriver;
 
-macro_rules! generate_ret {
+macro_rules! ret {
     ($n:expr, $e:expr) => {
         {
             let ret = $e;
             match ret {
                 0 => Ok(()),
-                _ => Err(anyhow!("{} $e returns error! value = {}", $n, ret))
+                _ => Err(anyhow!("{} returns error! value = {}", $n, ret))
             }
         }
     }
@@ -24,7 +24,7 @@ macro_rules! generate_ret {
 
 impl DiskDriver for DDriver {
     fn ddriver_open(self: &mut Self, path: &str) -> Result<()> {
-        unsafe { generate_ret!("ddriver_open", ddriver_open(CString::new(path).unwrap().into_raw())) }
+        unsafe { ret!("ddriver_open", ddriver_open(CString::new(path).unwrap().into_raw())) }
     }
 
     fn ddriver_close(self: &mut Self) -> Result<()> {
