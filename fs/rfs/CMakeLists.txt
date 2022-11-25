@@ -48,7 +48,7 @@ corrosion_add_cxxbridge(rfs_lib CRATE rfs MANIFEST_PATH rfs_lib FILES lib.rs)
 # Link C/C++ libraries with your Rust target
 corrosion_link_libraries(rfs ddriver)
 # Optionally explicitly define which linker to use.
-corrosion_set_linker(rfs your_custom_linker)
+# corrosion_set_linker(rfs your_custom_linker)
 # Optionally set linker arguments
 # corrosion_add_target_local_rustflags(rfs "-Clink-args=<linker arguments>")
 # Optionally tell CMake that the rust crate depends on another target (e.g. a code generator)
