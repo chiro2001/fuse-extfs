@@ -41,42 +41,30 @@ macro_rules! ret_ne {
 
 impl DiskDriver for DDriver {
     fn ddriver_open(self: &mut Self, path: &str) -> Result<()> {
-        unsafe {
-            self.fd = ddriver_open(CString::new(path).unwrap().into_raw());
-            ret_ne!("ddriver_open", self.fd)
-        }
+        self.fd = unsafe { ddriver_open(CString::new(path).unwrap().into_raw()) };
+        ret_ne!("ddriver_open", self.fd)
     }
 
     fn ddriver_close(self: &mut Self) -> Result<()> {
+        if self.fd != 0 { unsafe { ddriver_close(self.fd) }; }
         self.fd = 0;
-        unsafe {
-            ddriver_close(self.fd);
-        };
         Ok(())
     }
 
     fn ddriver_seek(self: &mut Self, offset: i64, whence: SeekType) -> Result<u64> {
-        unsafe {
-            Ok(ddriver_seek(self.fd, offset, whence.to_int()) as u64)
-        }
+        Ok(unsafe { ddriver_seek(self.fd, offset, whence.to_int()) as u64 })
     }
 
     fn ddriver_write(self: &mut Self, buf: &[u8], size: usize) -> Result<usize> {
-        unsafe {
-            Ok((ddriver_write(self.fd, SliceExt::cast_mut_force(buf).as_mut_ptr(), size)) as usize)
-        }
+        Ok(unsafe { (ddriver_write(self.fd, SliceExt::cast_mut_force(buf).as_mut_ptr(), size)) as usize })
     }
 
     fn ddriver_read(self: &mut Self, buf: &mut [u8], size: usize) -> Result<usize> {
-        unsafe {
-            Ok((ddriver_read(self.fd, SliceExt::cast_mut(buf).as_mut_ptr(), size)) as usize)
-        }
+        Ok(unsafe { (ddriver_read(self.fd, SliceExt::cast_mut(buf).as_mut_ptr(), size)) as usize })
     }
 
     fn ddriver_ioctl(self: &mut Self, cmd: u32, arg: &mut [u8]) -> Result<()> {
-        unsafe {
-            ret_ne!("ddriver_ioctl", ddriver_ioctl(self.fd, cmd as c_ulong, SliceExt::cast_mut(arg).as_mut_ptr()))
-        }
+        ret_ne!("ddriver_ioctl", unsafe { ddriver_ioctl(self.fd, cmd as c_ulong, SliceExt::cast_mut(arg).as_mut_ptr()) })
     }
 
     fn ddriver_reset(self: &mut Self) -> Result<()> {
