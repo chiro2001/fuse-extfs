@@ -51,13 +51,13 @@ set(RS_BIND_OUT ${PROJECT_SOURCE_DIR}/rfs_bind/src/bind.rs)
 configure_file(${PROJECT_SOURCE_DIR}/rfs_bind/build.rs.in ${PROJECT_SOURCE_DIR}/rfs_bind/build.rs)
 
 # cxxbridge for rust
-corrosion_import_crate(MANIFEST_PATH ${PROJECT_SOURCE_DIR}/rfs/Cargo.toml)
-corrosion_add_cxxbridge(rfs_lib CRATE rfs MANIFEST_PATH rfs_lib FILES lib.rs)
-
 corrosion_import_crate(MANIFEST_PATH ${PROJECT_SOURCE_DIR}/rfs_bind/Cargo.toml)
+corrosion_add_cxxbridge(rfs_bind CRATE rfs_bind_lib MANIFEST_PATH rfs_bind FILES lib.rs)
+
+#corrosion_import_crate(MANIFEST_PATH ${PROJECT_SOURCE_DIR}/rfs_bind/Cargo.toml)
 
 # Link C/C++ libraries with your Rust target
-corrosion_link_libraries(rfs_bind ddriver)
+corrosion_link_libraries(rfs_bind_lib ddriver)
 # Optionally explicitly define which linker to use.
 # corrosion_set_linker(rfs your_custom_linker)
 # Optionally set linker arguments
@@ -66,7 +66,7 @@ corrosion_add_target_local_rustflags(rfs_bind "-Clink-args=-lddriver")
 # Optionally tell CMake that the rust crate depends on another target (e.g. a code generator)
 # add_dependencies(cargo-prebuild_rfs custom_bindings_target)
 
-target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES} ddriver rfs_lib)
+target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES} ddriver rfs_bind)
 
 set(MOUNT_POINT ${PROJECT_SOURCE_DIR}/tests/mnt)
 set(DEVICE_PATH $ENV{HOME}/ddriver)

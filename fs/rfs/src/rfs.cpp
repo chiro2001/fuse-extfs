@@ -1,5 +1,5 @@
 #include "rfs.h"
-#include "rfs_lib/lib.h"
+#include "rfs_bind/lib.h"
 
 /******************************************************************************
 * SECTION: 宏定义
@@ -51,7 +51,7 @@ void *rfs_init(struct fuse_conn_info *conn_info) {
 
   /* 下面是一个控制设备的示例 */
   // super.fd = ddriver_open((char *) rfs_options.device);
-
+  wrfs_init(::rust::Str((char *) rfs_options.device));
 
   return nullptr;
 }
