@@ -37,48 +37,20 @@ pub fn get_fs() -> RFS<DDriver> {
     RFS::from_base(BASE.read().unwrap().clone(), DRIVER.read().unwrap().clone())
 }
 
+pub fn save_fs(fs: RFS<DDriver>) {
+    DRIVER.write().unwrap().set(fs.driver);
+    BASE.write().unwrap().set(fs.into());
+}
+
 pub fn wrfs_init(file: &str) {
     println!("wrfs_init({})", file);
-    // unsafe {
-    //     let driver = DDriver::new();
-    //     DRIVER = driver;
-    //     // let mut fs = RFS::new(Box::new(DDriver::new()));
-    //     // fs.rfs_init(file).unwrap();
-    //     // FS = Some(Mutex::new(fs));
-    //     // FS = Mutex::new(fs);
-    //     // FS = Some(fs);
-    //     let mut base = RFSBase::default();
-    //     BASE = base;
-    // }
-    // unsafe {
-    //     // FS.unwrap().get_mut().unwrap().rfs_init("test").unwrap();
-    //     // FS.unwrap().rfs_init("test").unwrap();
-    // }
     DRIVER.set(DDriver::new()).unwrap();
     BASE.set(RFSBase::default()).unwrap();
+    let mut fs = get_fs();
+    fs.rfs_init(file).unwrap();
+    save_fs(fs);
 }
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
-    use super::*;
-
-    #[derive(Clone, Copy, Default)]
-    struct B {
-        s: usize,
-    }
-
-    trait C {}
-
-    impl C for B {}
-
-    // #[derive(Clone, Copy, Default)]
-    struct A {
-        pub b: Arc<Box<dyn C>>,
-    }
-
-    // #[test]
-    // fn test_trait_copy() {
-    //     let a = A::default();
-    // }
 }

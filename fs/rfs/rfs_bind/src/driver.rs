@@ -12,6 +12,12 @@ pub struct DDriver {
     pub fd: i32,
 }
 
+impl DDriver {
+    pub fn set(&mut self, d: Self) {
+        self.fd = d.fd;
+    }
+}
+
 impl DiskDriver for DDriver {
     fn ddriver_open(self: &mut Self, path: &str) -> Result<()> {
         self.fd = unsafe { ddriver_open(CString::new(path).unwrap().into_raw()) };
