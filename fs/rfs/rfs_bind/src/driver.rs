@@ -7,7 +7,7 @@ use crate::bind::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriv
 use rfs::utils::*;
 use crate::ret_ne;
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct DDriver {
     pub fd: i32,
 }

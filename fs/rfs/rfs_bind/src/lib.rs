@@ -10,10 +10,17 @@ use mut_static::MutStatic;
 use std::sync::Mutex;
 use rfs::disk_driver::DiskDriver;
 
-use rfs::RFS;
+use rfs::{RFS, RFSBase};
 use crate::driver::DDriver;
 
-static mut FS: Option<RFS> = None;
+// static mut FS: Option<RFS> = None;
+// static mut BASE: Option<RFSBase> = RFSBase::default();
+// static mut DRIVER: Option<DDriver> = DDriver::default();
+lazy_static! {
+    // Store static mount point argument for signal call use
+    pub static ref BASE: MutStatic<RFSBase> = MutStatic::new();
+    pub static ref DRIVER: MutStatic<DDriver> = MutStatic::new();
+}
 
 #[cxx::bridge]
 mod ffi {
@@ -26,19 +33,29 @@ mod ffi {
 //     unsafe { FS.unwrap().get_mut().unwrap() }
 // }
 
+pub fn get_fs() -> RFS<DDriver> {
+    RFS::from_base(BASE.read().unwrap().clone(), DRIVER.read().unwrap().clone())
+}
+
 pub fn wrfs_init(file: &str) {
     println!("wrfs_init({})", file);
-    unsafe {
-        let mut fs = RFS::new(Box::new(DDriver::new()));
-        fs.rfs_init(file).unwrap();
-        // FS = Some(Mutex::new(fs));
-        // FS = Mutex::new(fs);
-        FS = Some(fs);
-    }
-    unsafe {
-        // FS.unwrap().get_mut().unwrap().rfs_init("test").unwrap();
-        // FS.unwrap().rfs_init("test").unwrap();
-    }
+    // unsafe {
+    //     let driver = DDriver::new();
+    //     DRIVER = driver;
+    //     // let mut fs = RFS::new(Box::new(DDriver::new()));
+    //     // fs.rfs_init(file).unwrap();
+    //     // FS = Some(Mutex::new(fs));
+    //     // FS = Mutex::new(fs);
+    //     // FS = Some(fs);
+    //     let mut base = RFSBase::default();
+    //     BASE = base;
+    // }
+    // unsafe {
+    //     // FS.unwrap().get_mut().unwrap().rfs_init("test").unwrap();
+    //     // FS.unwrap().rfs_init("test").unwrap();
+    // }
+    DRIVER.set(DDriver::new()).unwrap();
+    BASE.set(RFSBase::default()).unwrap();
 }
 
 #[cfg(test)]
