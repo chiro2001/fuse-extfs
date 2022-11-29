@@ -14,7 +14,6 @@ use rfs::utils::*;
 #[derive(Default)]
 pub struct DDriver {
     pub fd: i32,
-    // pub a: Vec<>
 }
 
 macro_rules! ret {
