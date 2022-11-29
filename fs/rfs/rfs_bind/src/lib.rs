@@ -22,11 +22,6 @@ mod ffi {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-}
-
 // pub fn get_fs() -> &mut RFS {
 //     unsafe { FS.unwrap().get_mut().unwrap() }
 // }
@@ -46,3 +41,27 @@ pub fn wrfs_init(file: &str) {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+    use super::*;
+
+    #[derive(Clone, Copy, Default)]
+    struct B {
+        s: usize,
+    }
+
+    trait C {}
+
+    impl C for B {}
+
+    // #[derive(Clone, Copy, Default)]
+    struct A {
+        pub b: Arc<Box<dyn C>>,
+    }
+
+    // #[test]
+    // fn test_trait_copy() {
+    //     let a = A::default();
+    // }
+}
