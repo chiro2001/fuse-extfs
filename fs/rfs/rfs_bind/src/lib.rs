@@ -5,6 +5,7 @@ pub mod driver;
 pub mod utils;
 mod bind;
 
+use std::os::linux::raw::stat;
 use std::ptr::read;
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
@@ -34,6 +35,8 @@ mod ffi {
     extern "Rust" {
         pub fn wrfs_init(file: &str);
         pub fn wrfs_destroy();
+        pub fn wrfs_mkdir(path: &str, mode: usize) -> i32;
+        // pub fn wrfs_getattr(path: &str, rfs_stat: &mut stat) -> i32;
     }
 }
 
@@ -64,7 +67,10 @@ pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
             Some(n) => n,
             None => "",
         };
-        if n.is_empty() { return 1; }
+        if n.is_empty() {
+            save_fs(fs);
+            return 1;
+        }
         match fs.rfs_lookup(ino, n) {
             Ok(r) => {
                 ino = r.0;
@@ -73,12 +79,44 @@ pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
             Err(_) => break
         };
     }
-    match name.next() {
-        Some(n) => fs.make_node(ino, n, mode, Ext2FileType::Directory).unwrap(),
-        None => return 1,
+    let r = match name.next() {
+        Some(n) => {
+            fs.make_node(ino, n, mode, Ext2FileType::Directory).unwrap();
+            0
+        }
+        None => 1
     };
     save_fs(fs);
-    0
+    r
+}
+
+pub fn wrfs_getattr(path: &str, rfs_stat: &mut stat) -> i32 {
+    let mut fs = get_fs();
+    let mut ino = EXT2_ROOT_INO;
+    let splits = path.split("/").collect::<Vec<&str>>()
+        .into_iter().filter(|x| !x.is_empty()).collect::<Vec<&str>>();
+    let mut name = splits.iter();
+    let mut inode: Ext2INode;
+    let mut r = 0;
+    loop {
+        let n = match name.next() {
+            Some(n) => n,
+            None => "",
+        };
+        if n.is_empty() {
+            r = 1;
+            break;
+        }
+        match fs.rfs_lookup(ino, n) {
+            Ok(r) => {
+                ino = r.0;
+                inode = r.1;
+            }
+            Err(_) => break
+        };
+    }
+    save_fs(fs);
+    r
 }
 
 #[cfg(test)]

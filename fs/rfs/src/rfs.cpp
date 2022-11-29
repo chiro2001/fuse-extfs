@@ -65,7 +65,8 @@ void *rfs_init(struct fuse_conn_info *conn_info) {
 void rfs_destroy(void *p) {
   /* TODO: 在这里进行卸载 */
 
-  ddriver_close(super.fd);
+  // ddriver_close(super.fd);
+  wrfs_destroy();
 }
 
 /**
