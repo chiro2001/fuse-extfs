@@ -802,6 +802,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bindgen",
+ "cxx",
+ "lazy_static",
+ "mut_static",
  "rfs",
 ]
 

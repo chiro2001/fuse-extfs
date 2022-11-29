@@ -50,7 +50,8 @@ void *rfs_init(struct fuse_conn_info *conn_info) {
   /* TODO: 在这里进行挂载 */
 
   /* 下面是一个控制设备的示例 */
-  super.fd = ddriver_open((char *) rfs_options.device);
+  // super.fd = ddriver_open((char *) rfs_options.device);
+
 
   return nullptr;
 }
