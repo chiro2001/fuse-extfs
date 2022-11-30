@@ -22,7 +22,7 @@ crate-type = ["staticlib", "rlib"]
 name = "rfs_bind"
 
 [profile.release]
-debug = true
+#debug = true
 panic = "abort"
 
 [profile.dev]
