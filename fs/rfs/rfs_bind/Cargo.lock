@@ -804,6 +804,7 @@ dependencies = [
  "bindgen",
  "cxx",
  "lazy_static",
+ "log",
  "mut_static",
  "rfs",
 ]

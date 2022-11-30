@@ -248,7 +248,7 @@ int ddriver_read(int fd, char *buf, size_t size) {
  * @return int 
  */
 int ddriver_ioctl(int fd, unsigned long cmd, void *arg) {
-  struct ddriver_state state;
+  struct ddriver_state state{};
   char buf[4096] = {'\0'};
   switch (cmd) {
     case IOC_REQ_DEVICE_SIZE:                         /* Device Size */

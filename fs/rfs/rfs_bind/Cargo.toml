@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = "1.0.66"
 cxx = "1.0.82"
 lazy_static = "1.4.0"
+log = "0.4.17"
 mut_static = "5.0.0"
 rfs = { path = "../rfs" }
 

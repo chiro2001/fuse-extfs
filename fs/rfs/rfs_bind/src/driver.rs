@@ -3,7 +3,7 @@ use std::ffi::CString;
 use std::os::raw::c_ulong;
 use rfs::disk_driver::*;
 use anyhow::{anyhow, Result};
-use crate::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_close, ddriver_ioctl};
+use crate::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_close, ddriver_ioctl, ret};
 use rfs::utils::*;
 use crate::ret_ne;
 
@@ -43,7 +43,7 @@ impl DiskDriver for DDriver {
     }
 
     fn ddriver_ioctl(self: &mut Self, cmd: u32, arg: &mut [u8]) -> Result<()> {
-        ret_ne!("ddriver_ioctl", unsafe { ddriver_ioctl(self.fd, cmd as c_ulong, SliceExt::cast_mut(arg).as_mut_ptr()) })
+        ret!("ddriver_ioctl", unsafe { ddriver_ioctl(self.fd, cmd as c_ulong, SliceExt::cast_mut(arg).as_mut_ptr()) })
     }
 
     fn ddriver_reset(self: &mut Self) -> Result<()> {

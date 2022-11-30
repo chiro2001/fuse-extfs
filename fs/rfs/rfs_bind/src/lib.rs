@@ -14,12 +14,13 @@ pub mod utils;
 use std::mem::size_of;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
+use log::info;
 use mut_static::MutStatic;
 
 use rfs::{RFS, RFSBase};
 use rfs::desc::{EXT2_ROOT_INO, Ext2DirEntry, Ext2FileType, Ext2INode};
 use rfs::desc::Ext2FileType::{Directory, RegularFile};
-use rfs::utils::{deserialize_row, serialize_row};
+use rfs::utils::{deserialize_row, init_logs, serialize_row};
 use crate::driver::DDriver;
 
 lazy_static! {
@@ -50,6 +51,8 @@ mod ffi {
 
 pub fn wrfs_init(file: &str) {
     println!("wrfs_init({})", file);
+    init_logs();
+    info!("log initiation done.");
     DRIVER.set(DDriver::new()).unwrap();
     BASE.set(RFSBase::default()).unwrap();
     let mut fs = get_fs();
