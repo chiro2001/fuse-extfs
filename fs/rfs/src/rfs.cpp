@@ -78,7 +78,7 @@ void rfs_destroy(void *p) {
  */
 int rfs_mkdir(const char *path, mode_t mode) {
   /* TODO: 解析路径，创建目录 */
-  return 0;
+  return wrfs_mkdir(::rust::Str(path), mode);
 }
 
 /**
@@ -89,8 +89,10 @@ int rfs_mkdir(const char *path, mode_t mode) {
  * @return int 0成功，否则失败
  */
 int rfs_getattr(const char *path, struct stat *rfs_stat) {
+  printf("sizeof(stat) = %lu\n", sizeof(struct stat));
   /* TODO: 解析路径，获取Inode，填充rfs_stat，可参考/fs/simplefs/sfs.c的sfs_getattr()函数实现 */
-  return 0;
+  return wrfs_getattr(::rust::Str(path), ::rust::Slice<::std::uint8_t>
+          ((::std::uint8_t *) rfs_stat, sizeof(struct stat)));
 }
 
 /**

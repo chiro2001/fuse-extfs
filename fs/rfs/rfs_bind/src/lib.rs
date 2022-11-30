@@ -1,6 +1,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+#![allow(deprecated)]
 
 include!("../bindings.rs");
 
@@ -13,15 +14,12 @@ pub mod utils;
 
 
 use std::os::linux::raw::stat;
-// use std::os::linux::raw::stat;
-// use std::ptr::read;
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
-// use std::sync::Mutex;
-// use rfs::disk_driver::DiskDriver;
 
 use rfs::{RFS, RFSBase};
 use rfs::desc::{EXT2_ROOT_INO, Ext2FileType, Ext2INode};
+use rfs::utils::{deserialize_row, serialize_row};
 use crate::driver::DDriver;
 
 lazy_static! {
@@ -44,7 +42,7 @@ mod ffi {
         pub fn wrfs_init(file: &str);
         pub fn wrfs_destroy();
         pub fn wrfs_mkdir(path: &str, mode: usize) -> i32;
-        // pub fn wrfs_getattr(path: &str, rfs_stat: &mut stat) -> i32;
+        pub fn wrfs_getattr(path: &str, rfs_stat: &mut [u8]) -> i32;
     }
 }
 
@@ -98,13 +96,20 @@ pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
     r
 }
 
-pub fn wrfs_getattr(path: &str, rfs_stat: &mut stat) -> i32 {
+pub fn wrfs_getattr(path: &str, rfs_stat: &mut [u8]) -> i32 {
+    let mut stat_struct: stat = unsafe { deserialize_row(rfs_stat) };
+    let r = wrfs_getattr_inner(path, &mut stat_struct);
+    rfs_stat.copy_from_slice(unsafe { serialize_row(&stat_struct) });
+    r
+}
+
+pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
     let mut fs = get_fs();
     let mut ino = EXT2_ROOT_INO;
     let splits = path.split("/").collect::<Vec<&str>>()
         .into_iter().filter(|x| !x.is_empty()).collect::<Vec<&str>>();
     let mut name = splits.iter();
-    let mut inode: Ext2INode;
+    let mut inode: Ext2INode = Default::default();
     let mut r = 0;
     loop {
         let n = match name.next() {
@@ -123,7 +128,27 @@ pub fn wrfs_getattr(path: &str, rfs_stat: &mut stat) -> i32 {
             Err(_) => break
         };
     }
-    // TODO: return attr
+    if r == 0 {
+        // return attr
+        let attr = inode.to_attr(ino);
+        // what's this? device number?
+        rfs_stat.st_dev = 0;
+        rfs_stat.st_ino = attr.ino;
+        rfs_stat.st_nlink = attr.nlink as u64;
+        rfs_stat.st_mode = inode.i_mode as u32;
+        rfs_stat.st_uid = attr.uid as u32;
+        rfs_stat.st_gid = attr.gid as u32;
+        rfs_stat.st_rdev = attr.rdev as u64;
+        rfs_stat.st_size = attr.size as i64;
+        rfs_stat.st_blksize = fs.block_size() as i64;
+        rfs_stat.st_blocks = attr.blocks as i64;
+        rfs_stat.st_atime = inode.i_atime as i64 * 1000;
+        rfs_stat.st_atime_nsec = inode.i_atime as i64;
+        rfs_stat.st_mtime = inode.i_mtime as i64 * 1000;
+        rfs_stat.st_mtime_nsec = inode.i_mtime as i64;
+        rfs_stat.st_ctime = inode.i_ctime as i64 * 1000;
+        rfs_stat.st_ctime_nsec = inode.i_ctime as i64;
+    }
     save_fs(fs);
     r
 }
