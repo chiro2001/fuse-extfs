@@ -28,8 +28,8 @@ static struct fuse_operations operations = {
         .rename = nullptr,                     /* 重命名，mv */
         .truncate = nullptr,                   /* 改变文件大小 */
         .open = nullptr,
-        .read = nullptr,                     /* 读文件 */
-        .write = nullptr,                     /* 写入文件 */
+        .read = rfs_read,                     /* 读文件 */
+        .write = rfs_write,                     /* 写入文件 */
         .opendir = nullptr,
         .readdir = rfs_readdir,         /* 填充dentrys */
         .init = rfs_init,             /* mount文件系统 */
@@ -173,7 +173,8 @@ int rfs_utimens(const char *path, const struct timespec tv[2]) {
 int rfs_write(const char *path, const char *buf, size_t size, off_t offset,
               struct fuse_file_info *fi) {
   /* 选做 */
-  return (int) size;
+  return wrfs_write(::rust::Str(path), ::rust::Slice<const std::uint8_t>((const std::uint8_t *) buf, size),
+                    size, offset);
 }
 
 /**
@@ -189,7 +190,8 @@ int rfs_write(const char *path, const char *buf, size_t size, off_t offset,
 int rfs_read(const char *path, char *buf, size_t size, off_t offset,
              struct fuse_file_info *fi) {
   /* 选做 */
-  return (int) size;
+  return wrfs_read(::rust::Str(path), ::rust::Slice<std::uint8_t>((std::uint8_t *) buf, size),
+                   size, offset);
 }
 
 /**
