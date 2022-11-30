@@ -11,12 +11,13 @@ extern crate core;
 pub mod driver;
 pub mod utils;
 
+use std::mem::size_of;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
 
 use rfs::{RFS, RFSBase};
-use rfs::desc::{EXT2_ROOT_INO, Ext2FileType, Ext2INode};
+use rfs::desc::{EXT2_ROOT_INO, Ext2DirEntry, Ext2FileType, Ext2INode};
 use rfs::desc::Ext2FileType::{Directory, RegularFile};
 use rfs::utils::{deserialize_row, serialize_row};
 use crate::driver::DDriver;
@@ -43,6 +44,7 @@ mod ffi {
         pub fn wrfs_mkdir(path: &str, mode: usize) -> i32;
         pub fn wrfs_getattr(path: &str, rfs_stat: &mut [u8]) -> i32;
         pub fn wrfs_mknod(path: &str, mode: usize, dev: u32) -> i32;
+        pub fn wrfs_readdir(path: &str, offset: i64, buf: &mut [u8]) -> i32;
     }
 }
 
@@ -167,16 +169,30 @@ pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
     r
 }
 
-pub fn wrfs_readdir(path: &str, buf: &[u8]) -> i32 {
-    let mut fs = get_fs();
-    let mut r = 0;
-    let ret = wrfs_parse_path(&mut fs, path);
-    match ret {
-        Ok((ino, inode)) => {}
-        Err(_) => {
-            r = 2;
-        }
+pub fn wrfs_readdir(path: &str, offset: i64, buf: &mut [u8]) -> i32 {
+    let v = match wrfs_readdir_inner(path, offset) {
+        Ok(v) => v.into_iter()
+            .map(|x| unsafe { serialize_row(&x) }.to_vec())
+            .collect(),
+        _ => { vec![] }
+    };
+    let r = v.len();
+    for (i, e) in v.into_iter().enumerate() {
+        buf[(i * size_of::<Ext2DirEntry>())..((i + 1) * size_of::<Ext2DirEntry>())]
+            .copy_from_slice(&e);
     }
+    r as i32
+}
+
+pub fn wrfs_readdir_inner(path: &str, offset: i64) -> Result<Vec<Ext2DirEntry>> {
+    let mut fs = get_fs();
+    let ret = wrfs_parse_path(&mut fs, path);
+    let r = match ret {
+        Ok((ino, inode)) => {
+            fs.rfs_readdir(ino as u64, offset)
+        }
+        Err(e) => Err(e)
+    };
     save_fs(fs);
     r
 }
