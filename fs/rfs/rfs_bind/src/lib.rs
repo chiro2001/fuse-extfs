@@ -17,7 +17,7 @@ use lazy_static::lazy_static;
 use log::info;
 use mut_static::MutStatic;
 
-use rfs::{RFS, RFSBase};
+use rfs::{DEVICE_FILE, FORCE_FORMAT, MKFS_FORMAT, MOUNT_POINT, RFS, RFSBase};
 use rfs::desc::{EXT2_ROOT_INO, Ext2DirEntry, Ext2FileType, Ext2INode};
 use rfs::desc::Ext2FileType::{Directory, RegularFile};
 use rfs::utils::{deserialize_row, init_logs, serialize_row};
@@ -55,6 +55,11 @@ pub fn wrfs_init(file: &str) {
     info!("log initiation done.");
     DRIVER.set(DDriver::new()).unwrap();
     BASE.set(RFSBase::default()).unwrap();
+    // set static mutable values
+    DEVICE_FILE.set(file.to_string().clone()).unwrap();
+    MOUNT_POINT.set(format!("{}/ddriver", std::env::var("HOME").unwrap().to_string())).unwrap();
+    FORCE_FORMAT.set(false).unwrap();
+    MKFS_FORMAT.set(false).unwrap();
     let mut fs = get_fs();
     fs.rfs_init(file).unwrap();
     save_fs(fs);
