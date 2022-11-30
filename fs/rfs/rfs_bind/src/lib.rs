@@ -49,6 +49,7 @@ mod ffi {
         pub fn wrfs_mknod(path: &str, mode: usize, dev: u32) -> i32;
         pub fn wrfs_readdir(path: &str, offset: i64, buf: &mut [u8]) -> i32;
         pub fn wrfs_read(path: &str, buf: &mut [u8], size: u32, offset: i64) -> i32;
+        pub fn wrfs_write(path: &str, data: &[u8], size: u32, offset: i64) -> i32;
     }
 }
 
@@ -116,13 +117,6 @@ fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
             Err(_) => break
         };
     }
-    // let r = match name.next() {
-    //     Some(n) => {
-    //         fs.make_node(ino, n, mode, node_type).unwrap();
-    //         0
-    //     }
-    //     None => -ENOENT
-    // };
     let r = match fs.make_node(ino, basename, mode, node_type) {
         Ok(_) => 0,
         Err(_) => -ENOENT,
@@ -259,6 +253,34 @@ pub fn wrfs_read(path: &str, buf: &mut [u8], size: u32, offset: i64) -> i32 {
             let read_size = data.len() as i32;
             buf[..min(read_size as usize, size as usize)].copy_from_slice(&data);
             read_size
+        }
+        Err(_) => {
+            save_fs(fs);
+            -ENOENT
+        }
+    };
+    r
+}
+
+pub fn wrfs_write(path: &str, data: &[u8], size: u32, offset: i64) -> i32 {
+    let mut fs = get_fs();
+    let r = match wrfs_parse_path(&mut fs, path) {
+        Ok((ino, inode)) => {
+            if inode.i_mode as usize >> 12 == Directory.into() {
+                save_fs(fs);
+                return -EISDIR;
+            }
+            if offset > inode.i_size as i64 {
+                save_fs(fs);
+                return -ESPIPE;
+            }
+            (match fs.rfs_write(ino as u64, offset, &data[..size as usize]) {
+                Ok(data) => data,
+                Err(_) => {
+                    save_fs(fs);
+                    return -EIO;
+                }
+            }) as i32
         }
         Err(_) => {
             save_fs(fs);
