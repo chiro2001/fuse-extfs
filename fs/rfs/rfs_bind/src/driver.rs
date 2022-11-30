@@ -3,6 +3,7 @@ use std::ffi::CString;
 use std::os::raw::c_ulong;
 use rfs::disk_driver::*;
 use anyhow::{anyhow, Result};
+use log::info;
 use crate::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_close, ddriver_ioctl, ret};
 use rfs::utils::*;
 use crate::ret_ne;
@@ -21,6 +22,7 @@ impl DDriver {
 impl DiskDriver for DDriver {
     fn ddriver_open(self: &mut Self, path: &str) -> Result<()> {
         self.fd = unsafe { ddriver_open(CString::new(path).unwrap().into_raw()) };
+        info!("got fd: {}", self.fd);
         ret_ne!("ddriver_open", self.fd)
     }
 
