@@ -11,9 +11,11 @@ extern crate core;
 pub mod driver;
 pub mod utils;
 
+use std::cmp::min;
 use std::mem::size_of;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
+use libc::{EIO, EISDIR, ENOENT, ESPIPE};
 use log::{debug, info, warn};
 use mut_static::MutStatic;
 
@@ -46,6 +48,7 @@ mod ffi {
         pub fn wrfs_getattr(path: &str, rfs_stat: &mut [u8]) -> i32;
         pub fn wrfs_mknod(path: &str, mode: usize, dev: u32) -> i32;
         pub fn wrfs_readdir(path: &str, offset: i64, buf: &mut [u8]) -> i32;
+        pub fn wrfs_read(path: &str, buf: &mut [u8], size: u32, offset: i64) -> i32;
     }
 }
 
@@ -99,7 +102,7 @@ fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
         if n.is_empty() {
             if ino == EXT2_ROOT_INO {
                 save_fs(fs);
-                return -2;
+                return -ENOENT;
             } else {
                 break;
             }
@@ -118,11 +121,11 @@ fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
     //         fs.make_node(ino, n, mode, node_type).unwrap();
     //         0
     //     }
-    //     None => -2
+    //     None => -ENOENT
     // };
     let r = match fs.make_node(ino, basename, mode, node_type) {
         Ok(_) => 0,
-        Err(_) => -2,
+        Err(_) => -ENOENT,
     };
     save_fs(fs);
     r
@@ -200,7 +203,7 @@ pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
         }
         Err(_) => {
             warn!("wrfs_getattr_inner({}) not found!", path);
-            r = -2;
+            r = -ENOENT;
         }
     }
     save_fs(fs);
@@ -231,6 +234,37 @@ pub fn wrfs_readdir_inner(path: &str, offset: i64) -> Result<Vec<Ext2DirEntry>> 
         Err(e) => Err(e)
     };
     save_fs(fs);
+    r
+}
+
+pub fn wrfs_read(path: &str, buf: &mut [u8], size: u32, offset: i64) -> i32 {
+    let mut fs = get_fs();
+    let r = match wrfs_parse_path(&mut fs, path) {
+        Ok((ino, inode)) => {
+            if inode.i_mode as usize >> 12 == Directory.into() {
+                save_fs(fs);
+                return -EISDIR;
+            }
+            if offset > inode.i_size as i64 {
+                save_fs(fs);
+                return -ESPIPE;
+            }
+            let data = match fs.rfs_read(ino as u64, offset, size) {
+                Ok(data) => data,
+                Err(_) => {
+                    save_fs(fs);
+                    return -EIO;
+                }
+            };
+            let read_size = data.len() as i32;
+            buf[..min(read_size as usize, size as usize)].copy_from_slice(&data);
+            read_size
+        }
+        Err(_) => {
+            save_fs(fs);
+            -ENOENT
+        }
+    };
     r
 }
 
