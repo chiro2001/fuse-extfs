@@ -41,7 +41,7 @@ message("FUSE_LIBRARIES ${FUSE_LIBRARIES}")
 message("DIR_SRCS ${DIR_SRCS}")
 message("CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 
-set(RS_BIND_OUT ${PROJECT_SOURCE_DIR}/rfs_bind/src/bind.rs)
+#set(RS_BIND_OUT ${PROJECT_SOURCE_DIR}/rfs_bind/bindings.rs)
 
 #if(NOT EXISTS ${RS_BIND_OUT})
 #    message(STATUS "Generate rust-c bindings...")

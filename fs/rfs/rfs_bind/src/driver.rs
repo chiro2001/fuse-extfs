@@ -3,7 +3,7 @@ use std::ffi::CString;
 use std::os::raw::c_ulong;
 use rfs::disk_driver::*;
 use anyhow::{anyhow, Result};
-use crate::bind::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_close, ddriver_ioctl};
+use crate::{ddriver_seek, ddriver_read, ddriver_write, ddriver_open, ddriver_close, ddriver_ioctl};
 use rfs::utils::*;
 use crate::ret_ne;
 

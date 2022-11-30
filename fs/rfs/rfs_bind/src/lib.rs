@@ -1,16 +1,24 @@
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+
+include!("../bindings.rs");
+
 extern crate rfs;
 extern crate core;
 
 pub mod driver;
 pub mod utils;
-mod bind;
+// mod bind;
+
 
 use std::os::linux::raw::stat;
-use std::ptr::read;
+// use std::os::linux::raw::stat;
+// use std::ptr::read;
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
-use std::sync::Mutex;
-use rfs::disk_driver::DiskDriver;
+// use std::sync::Mutex;
+// use rfs::disk_driver::DiskDriver;
 
 use rfs::{RFS, RFSBase};
 use rfs::desc::{EXT2_ROOT_INO, Ext2FileType, Ext2INode};
@@ -61,7 +69,7 @@ pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
         .into_iter().filter(|x| !x.is_empty()).collect::<Vec<&str>>();
     let mut ino = EXT2_ROOT_INO;
     let mut name = splits.iter();
-    let mut inode: Ext2INode;
+    // let mut inode: Ext2INode;
     loop {
         let n = match name.next() {
             Some(n) => n,
@@ -74,7 +82,7 @@ pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
         match fs.rfs_lookup(ino, n) {
             Ok(r) => {
                 ino = r.0;
-                inode = r.1;
+                // inode = r.1;
             }
             Err(_) => break
         };
@@ -115,6 +123,7 @@ pub fn wrfs_getattr(path: &str, rfs_stat: &mut stat) -> i32 {
             Err(_) => break
         };
     }
+    // TODO: return attr
     save_fs(fs);
     r
 }

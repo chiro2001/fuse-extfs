@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
 
-    let out_path = format!("{}/rfs_bind/src/bind.rs", base_dir);
+    let out_path = format!("{}/rfs_bind/bindings.rs", base_dir);
     println!("out_path = {}", out_path);
     bindings
         .write_to_file(out_path)
