@@ -186,9 +186,8 @@ pub fn wrfs_readdir(path: &str, offset: i64, buf: &mut [u8]) -> i32 {
 
 pub fn wrfs_readdir_inner(path: &str, offset: i64) -> Result<Vec<Ext2DirEntry>> {
     let mut fs = get_fs();
-    let ret = wrfs_parse_path(&mut fs, path);
-    let r = match ret {
-        Ok((ino, inode)) => {
+    let r = match wrfs_parse_path(&mut fs, path) {
+        Ok((ino, _inode)) => {
             fs.rfs_readdir(ino as u64, offset)
         }
         Err(e) => Err(e)

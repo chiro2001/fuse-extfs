@@ -115,9 +115,20 @@ int rfs_getattr(const char *path, struct stat *rfs_stat) {
  */
 int rfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
                 struct fuse_file_info *fi) {
-
+  const auto buf_sz = sizeof(ext2_dir_entry) * 32;
+  std::uint8_t buf_entries[buf_sz];
   /* TODO: 解析路径，获取目录的Inode，并读取目录项，利用filler填充到buf，可参考/fs/simplefs/sfs.c的sfs_readdir()函数实现 */
-  return 0;
+  auto r = wrfs_readdir(
+          ::rust::Str(path), offset,
+          ::rust::Slice<::std::uint8_t>(buf_entries, buf_sz));
+  if (r > 0) {
+    // get first one only
+    auto *entry = (rfs_dentry *) buf_entries;
+    filler(buf, entry->name, nullptr, ++offset);
+    return 0;
+  } else {
+    return 2;
+  }
 }
 
 /**
