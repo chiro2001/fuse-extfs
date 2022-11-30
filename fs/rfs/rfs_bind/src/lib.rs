@@ -206,15 +206,16 @@ pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
 
 pub fn wrfs_readdir(path: &str, offset: i64, buf: &mut [u8]) -> i32 {
     let v = match wrfs_readdir_inner(path, offset) {
-        Ok(v) => v.into_iter()
-            .map(|x| unsafe { serialize_row(&x) }.to_vec())
-            .collect(),
+        Ok(v) => v,
         _ => { vec![] }
     };
     let r = v.len();
     for (i, e) in v.into_iter().enumerate() {
+        let mut e = e.clone();
+        // fill zero to unused bytes
+        e.name[e.name_len as usize..].fill(0);
         buf[(i * size_of::<Ext2DirEntry>())..((i + 1) * size_of::<Ext2DirEntry>())]
-            .copy_from_slice(&e);
+            .copy_from_slice(&unsafe { serialize_row(&e) });
     }
     r as i32
 }

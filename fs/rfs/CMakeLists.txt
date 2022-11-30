@@ -52,5 +52,5 @@ set(MOUNT_POINT ${PROJECT_SOURCE_DIR}/tests/mnt)
 set(DEVICE_PATH $ENV{HOME}/ddriver)
 
 make_directory(${CMAKE_BINARY_DIR}/mnt)
-add_test(NAME rfs-run COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} --device=${DEVICE_PATH} ${MOUNT_POINT})
+add_test(NAME rfs-run COMMAND ${CMAKE_BINARY_DIR}/${PROJECT_NAME} --device=${DEVICE_PATH} ${MOUNT_POINT} -d -s -f)
 add_test(NAME rfs-stop COMMAND fusermount -u ${MOUNT_POINT})
