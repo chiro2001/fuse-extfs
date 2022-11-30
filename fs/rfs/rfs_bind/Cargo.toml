@@ -17,7 +17,7 @@ bindgen = "0.63.0"
 
 [lib]
 crate-type = ["staticlib", "rlib"]
-name = "rfs_bind_lib"
+name = "rfs_bind"
 
 [profile.release]
 debug = true

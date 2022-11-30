@@ -10,7 +10,7 @@ message(STATUS "Include dirs: ${INCLUDE_DIRS}")
 include_directories(${INCLUDE_DIRS})
 
 # Sources
-add_library(ddriver STATIC "${PROJECT_SOURCE_DIR}/ddriver.c")
+add_library(ddriver STATIC "${PROJECT_SOURCE_DIR}/ddriver.cpp")
 
 # Links
 # link_libraries(m)
