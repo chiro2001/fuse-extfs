@@ -11,6 +11,7 @@ extern crate core;
 pub mod driver;
 pub mod utils;
 
+use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
 
@@ -97,7 +98,7 @@ fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
             fs.make_node(ino, n, mode, node_type).unwrap();
             0
         }
-        None => 1
+        None => 2
     };
     save_fs(fs);
     r
@@ -110,22 +111,19 @@ pub fn wrfs_getattr(path: &str, rfs_stat: &mut [u8]) -> i32 {
     r
 }
 
-pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
-    let mut fs = get_fs();
+pub fn wrfs_parse_path(fs: &mut RFS<DDriver>, path: &str) -> Result<(usize, Ext2INode)> {
     let mut ino = EXT2_ROOT_INO;
     let splits = path.split("/").collect::<Vec<&str>>()
         .into_iter().filter(|x| !x.is_empty()).collect::<Vec<&str>>();
     let mut name = splits.iter();
     let mut inode: Ext2INode = Default::default();
-    let mut r = 0;
     loop {
         let n = match name.next() {
             Some(n) => n,
             None => "",
         };
         if n.is_empty() {
-            r = 1;
-            break;
+            return Err(anyhow!("no such file"));
         }
         match fs.rfs_lookup(ino, n) {
             Ok(r) => {
@@ -134,24 +132,50 @@ pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
             }
             Err(_) => break
         };
+    };
+    Ok((ino, inode))
+}
+
+pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
+    let mut fs = get_fs();
+    let ret = wrfs_parse_path(&mut fs, path);
+    let mut r = 0;
+    match ret {
+        Ok((ino, inode)) => {
+            // return attr
+            let attr = inode.to_attr(ino);
+            // what's this? device number?
+            rfs_stat.st_dev = 0;
+            rfs_stat.st_ino = attr.ino;
+            rfs_stat.st_nlink = attr.nlink as u64;
+            rfs_stat.st_mode = inode.i_mode as u32;
+            rfs_stat.st_uid = attr.uid as u32;
+            rfs_stat.st_gid = attr.gid as u32;
+            rfs_stat.st_rdev = attr.rdev as u64;
+            rfs_stat.st_size = attr.size as i64;
+            rfs_stat.st_blksize = fs.block_size() as i64;
+            rfs_stat.st_blocks = attr.blocks as i64;
+            rfs_stat.st_atim = timespec { tv_sec: inode.i_atime as __time_t, tv_nsec: 0 };
+            rfs_stat.st_mtim = timespec { tv_sec: inode.i_mtime as __time_t, tv_nsec: 0 };
+            rfs_stat.st_ctim = timespec { tv_sec: inode.i_ctime as __time_t, tv_nsec: 0 };
+        }
+        Err(_) => {
+            r = 2;
+        }
     }
-    if r == 0 {
-        // return attr
-        let attr = inode.to_attr(ino);
-        // what's this? device number?
-        rfs_stat.st_dev = 0;
-        rfs_stat.st_ino = attr.ino;
-        rfs_stat.st_nlink = attr.nlink as u64;
-        rfs_stat.st_mode = inode.i_mode as u32;
-        rfs_stat.st_uid = attr.uid as u32;
-        rfs_stat.st_gid = attr.gid as u32;
-        rfs_stat.st_rdev = attr.rdev as u64;
-        rfs_stat.st_size = attr.size as i64;
-        rfs_stat.st_blksize = fs.block_size() as i64;
-        rfs_stat.st_blocks = attr.blocks as i64;
-        rfs_stat.st_atim = timespec { tv_sec: inode.i_atime as __time_t, tv_nsec: 0 };
-        rfs_stat.st_mtim = timespec { tv_sec: inode.i_mtime as __time_t, tv_nsec: 0 };
-        rfs_stat.st_ctim = timespec { tv_sec: inode.i_ctime as __time_t, tv_nsec: 0 };
+    save_fs(fs);
+    r
+}
+
+pub fn wrfs_readdir(path: &str, buf: &[u8]) -> i32 {
+    let mut fs = get_fs();
+    let mut r = 0;
+    let ret = wrfs_parse_path(&mut fs, path);
+    match ret {
+        Ok((ino, inode)) => {}
+        Err(_) => {
+            r = 2;
+        }
     }
     save_fs(fs);
     r
