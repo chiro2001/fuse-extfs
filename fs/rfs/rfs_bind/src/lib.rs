@@ -10,14 +10,13 @@ extern crate core;
 
 pub mod driver;
 pub mod utils;
-// mod bind;
-
 
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
 
 use rfs::{RFS, RFSBase};
 use rfs::desc::{EXT2_ROOT_INO, Ext2FileType, Ext2INode};
+use rfs::desc::Ext2FileType::{Directory, RegularFile};
 use rfs::utils::{deserialize_row, serialize_row};
 use crate::driver::DDriver;
 
@@ -42,6 +41,7 @@ mod ffi {
         pub fn wrfs_destroy();
         pub fn wrfs_mkdir(path: &str, mode: usize) -> i32;
         pub fn wrfs_getattr(path: &str, rfs_stat: &mut [u8]) -> i32;
+        pub fn wrfs_mknod(path: &str, mode: usize, dev: u32) -> i32;
     }
 }
 
@@ -61,6 +61,14 @@ pub fn wrfs_destroy() {
 }
 
 pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
+    wrfs_make_node(path, mode, Directory)
+}
+
+pub fn wrfs_mknod(path: &str, mode: usize, _dev: u32) -> i32 {
+    wrfs_make_node(path, mode, RegularFile)
+}
+
+fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
     let mut fs = get_fs();
     let splits = path.split("/").collect::<Vec<&str>>()
         .into_iter().filter(|x| !x.is_empty()).collect::<Vec<&str>>();
@@ -86,7 +94,7 @@ pub fn wrfs_mkdir(path: &str, mode: usize) -> i32 {
     }
     let r = match name.next() {
         Some(n) => {
-            fs.make_node(ino, n, mode, Ext2FileType::Directory).unwrap();
+            fs.make_node(ino, n, mode, node_type).unwrap();
             0
         }
         None => 1

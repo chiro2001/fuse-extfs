@@ -129,7 +129,7 @@ int rfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
  */
 int rfs_mknod(const char *path, mode_t mode, dev_t dev) {
   /* TODO: 解析路径，并创建相应的文件 */
-  return 0;
+  return wrfs_mknod(::rust::Str(path), mode, dev);
 }
 
 /**
