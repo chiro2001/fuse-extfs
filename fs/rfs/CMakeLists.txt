@@ -36,7 +36,7 @@ message("FUSE_LIBRARIES ${FUSE_LIBRARIES}")
 message("DIR_SRCS ${DIR_SRCS}")
 message("CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 
-configure_file(${PROJECT_SOURCE_DIR}/rfs_bind/build.rs.in ${PROJECT_SOURCE_DIR}/rfs_bind/build.rs)
+configure_file(${PROJECT_SOURCE_DIR}/rfs_bind/build.rs.in.rs ${PROJECT_SOURCE_DIR}/rfs_bind/build.rs)
 
 # cxxbridge for rust
 corrosion_import_crate(MANIFEST_PATH ${PROJECT_SOURCE_DIR}/rfs_bind/Cargo.toml)

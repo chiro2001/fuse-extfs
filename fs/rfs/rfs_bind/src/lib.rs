@@ -13,7 +13,6 @@ pub mod utils;
 // mod bind;
 
 
-use std::os::linux::raw::stat;
 use lazy_static::lazy_static;
 use mut_static::MutStatic;
 
@@ -142,12 +141,9 @@ pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
         rfs_stat.st_size = attr.size as i64;
         rfs_stat.st_blksize = fs.block_size() as i64;
         rfs_stat.st_blocks = attr.blocks as i64;
-        rfs_stat.st_atime = inode.i_atime as i64 * 1000;
-        rfs_stat.st_atime_nsec = inode.i_atime as i64;
-        rfs_stat.st_mtime = inode.i_mtime as i64 * 1000;
-        rfs_stat.st_mtime_nsec = inode.i_mtime as i64;
-        rfs_stat.st_ctime = inode.i_ctime as i64 * 1000;
-        rfs_stat.st_ctime_nsec = inode.i_ctime as i64;
+        rfs_stat.st_atim = timespec { tv_sec: inode.i_atime as __time_t, tv_nsec: 0 };
+        rfs_stat.st_mtim = timespec { tv_sec: inode.i_mtime as __time_t, tv_nsec: 0 };
+        rfs_stat.st_ctim = timespec { tv_sec: inode.i_ctime as __time_t, tv_nsec: 0 };
     }
     save_fs(fs);
     r

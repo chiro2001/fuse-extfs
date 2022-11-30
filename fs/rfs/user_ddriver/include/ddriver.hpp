@@ -3,6 +3,10 @@
 
 #include "ddriver_ctl.hpp"
 #include <cstdio>
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+#include "fuse.h"
 
 int ddriver_open(char *path);
 int ddriver_seek(int fd, off_t offset, int whence);
