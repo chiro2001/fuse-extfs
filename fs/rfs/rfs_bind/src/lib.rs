@@ -291,5 +291,8 @@ pub fn wrfs_write(path: &str, data: &[u8], size: u32, offset: i64) -> i32 {
     r
 }
 
+// TODO: SETATTR Function not implemented
+// pub fn wrfs_setxattr()
+
 #[cfg(test)]
 mod tests {}

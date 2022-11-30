@@ -7,10 +7,11 @@ GOLDEN="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 function check_write () {
     _PARAM=$1
     _TEST_CASE=$2
+    # if ! echo "$_PARAM" > "${MNTPOINT}"/file0; then
     if ! echo "$_PARAM" | tee "${MNTPOINT}"/file0 > /dev/null; then
         fail "$_TEST_CASE: 写入$_PARAM到文件${MNTPOINT}/file0失败"
         return 1
-    fi 
+    fi
     return 0
 }
 
@@ -25,7 +26,7 @@ function check_read () {
     
     OUTPUT=$(cat "${MNTPOINT}"/file0)
     if [[ "${OUTPUT}" != "${GOLDEN}" ]]; then
-        fail "$_TEST_CASE: 读文件${MNTPOINT}/file0成功, 但内容不同, 正确的内容为: $GOLDEN"
+        fail "$_TEST_CASE: 读文件${MNTPOINT}/file0成功, 但内容不同, 正确的内容为: $GOLDEN, OUTPUT=${OUTPUT}"
         return 1
     fi
     return 0
