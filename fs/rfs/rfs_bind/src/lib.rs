@@ -88,15 +88,23 @@ fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
     let mut ino = EXT2_ROOT_INO;
     let mut name = splits.iter();
     // let mut inode: Ext2INode;
+    let mut basename = "unknown";
     loop {
-        let n = match name.next() {
+        let n = name.next();
+        debug!("name.next = {:?}", n);
+        let n = match n {
             Some(n) => n,
             None => "",
         };
         if n.is_empty() {
-            save_fs(fs);
-            return -2;
+            if ino == EXT2_ROOT_INO {
+                save_fs(fs);
+                return -2;
+            } else {
+                break;
+            }
         }
+        basename = n.clone();
         match fs.rfs_lookup(ino, n) {
             Ok(r) => {
                 ino = r.0;
@@ -105,12 +113,16 @@ fn wrfs_make_node(path: &str, mode: usize, node_type: Ext2FileType) -> i32 {
             Err(_) => break
         };
     }
-    let r = match name.next() {
-        Some(n) => {
-            fs.make_node(ino, n, mode, node_type).unwrap();
-            0
-        }
-        None => -2
+    // let r = match name.next() {
+    //     Some(n) => {
+    //         fs.make_node(ino, n, mode, node_type).unwrap();
+    //         0
+    //     }
+    //     None => -2
+    // };
+    let r = match fs.make_node(ino, basename, mode, node_type) {
+        Ok(_) => 0,
+        Err(_) => -2,
     };
     save_fs(fs);
     r
@@ -136,15 +148,8 @@ pub fn wrfs_parse_path(fs: &mut RFS<DDriver>, path: &str) -> Result<(usize, Ext2
     let mut may_be_root = true;
     debug!("splits = {:?}", splits);
     loop {
-        // let n = match name.next() {
-        //     Some(n) => n,
-        //     None => "",
-        // };
-        // if name_index >= splits.len() { break; }
-        // to end
         if name_index == splits.len() {
             if !may_be_root {
-                // return Err(anyhow!("no such file"));
                 break;
             }
         } else {
