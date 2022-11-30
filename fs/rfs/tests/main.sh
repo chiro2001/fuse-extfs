@@ -100,7 +100,7 @@ function mount_fuse() {
 }
 
 function check_mount() {
-    if ! mount | grep "${PROJECT_NAME}" >/dev/null; then
+    if ! mount | grep -e "^${PROJECT_NAME}\s" >/dev/null; then
         return 1
     fi
     return 0
