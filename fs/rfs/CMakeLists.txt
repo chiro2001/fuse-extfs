@@ -19,7 +19,7 @@ if (CXXBRIDGE STREQUAL "CXXBRIDGE-NOTFOUND")
     find_program(CXXBRIDGE cxxbridge PATHS "$ENV{HOME}/.cargo/bin/")
 endif ()
 
-add_compile_options(-D_FILE_OFFSET_BITS=64 -no-pie)
+add_compile_options(-D_FILE_OFFSET_BITS=64 -no-pie -Wall --pedantic -g -std=c++20)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall --pedantic -g")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
