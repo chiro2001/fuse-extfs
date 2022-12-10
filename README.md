@@ -5,6 +5,8 @@ The repository is mainly for course project, aiming at file system teaching proc
 
 在本次实验中结合 Rust 与 C++ 实现了一个暂时不完全的 EXT2 文件系统。
 
+文件系统主要逻辑在 [chiro2001/rfs](https://github.com/chiro2001/rfs)，本 repo 仅是 rfs 的 c++ 调用移植。
+
 ### Roadmap
 
 - [x] basic
