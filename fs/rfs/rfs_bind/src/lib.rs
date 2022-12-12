@@ -19,7 +19,7 @@ use libc::{EIO, EISDIR, ENOENT, ESPIPE};
 use log::{debug, info, warn};
 use mut_static::MutStatic;
 
-use rfs::{DEVICE_FILE, FORCE_FORMAT, MKFS_FORMAT, MOUNT_POINT, RFS, RFSBase};
+use rfs::{DEVICE_FILE, FORCE_FORMAT, MKFS_FORMAT, MOUNT_POINT, ENABLE_CACHING, LAYOUT_FILE, RFS, RFSBase};
 use rfs::desc::{EXT2_ROOT_INO, Ext2DirEntry, Ext2FileType, Ext2INode};
 use rfs::desc::Ext2FileType::{Directory, RegularFile};
 use rfs::utils::{deserialize_row, init_logs, serialize_row};
@@ -64,6 +64,8 @@ pub fn wrfs_init(file: &str) {
     MOUNT_POINT.set(format!("{}/ddriver", std::env::var("HOME").unwrap().to_string())).unwrap();
     FORCE_FORMAT.set(false).unwrap();
     MKFS_FORMAT.set(false).unwrap();
+    LAYOUT_FILE.set("include/fs.layout".to_string()).unwrap();
+    ENABLE_CACHING.set(false).unwrap();
     let mut fs = get_fs();
     fs.rfs_init(file).unwrap();
     save_fs(fs);
