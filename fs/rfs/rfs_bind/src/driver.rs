@@ -52,6 +52,10 @@ impl DiskDriver for DDriver {
         self.fd = 0;
         Ok(())
     }
+
+    fn ddriver_flush(&mut self) -> Result<()> {
+        Ok(())
+    }
 }
 
 impl DDriver {
