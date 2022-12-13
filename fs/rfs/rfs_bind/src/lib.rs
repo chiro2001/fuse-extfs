@@ -181,7 +181,7 @@ pub fn wrfs_getattr_inner(path: &str, rfs_stat: &mut stat) -> i32 {
         Ok((ino, inode)) => {
             debug!("got attr [{}] {:?}", ino, inode);
             // return attr
-            let attr = inode.to_attr(ino);
+            let attr = inode.to_attr(ino, fs.block_size());
             // what's this? device number?
             rfs_stat.st_dev = 0;
             rfs_stat.st_ino = attr.ino;

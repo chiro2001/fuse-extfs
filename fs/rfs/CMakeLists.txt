@@ -46,7 +46,7 @@ corrosion_link_libraries(rfs_bind ddriver)
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/user_ddriver)
 target_link_libraries(${PROJECT_NAME} librfs_bind_lib.a librfs_bind.a libddriver.a)
-target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES} ddriver rfs_bind_lib)
+target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES} ddriver rfs_bind_lib fuse3)
 
 set(MOUNT_POINT ${PROJECT_SOURCE_DIR}/tests/mnt)
 set(DEVICE_PATH $ENV{HOME}/ddriver)
